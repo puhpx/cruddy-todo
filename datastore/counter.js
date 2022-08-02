@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const sprintf = require('sprintf-js').sprintf;
 
-var counter = 0;
+var counter;
 
 // Private helper functions ////////////////////////////////////////////////////
 
@@ -36,11 +36,17 @@ const writeCounter = (count, callback) => {
   });
 };
 
+
+
 // Public API - Fix this function //////////////////////////////////////////////
 
-exports.getNextUniqueId = () => {
-  counter = counter + 1;
-  return zeroPaddedNumber(counter);
+exports.getNextUniqueId = (callback) => {
+  readCounter((err, count) => {
+    writeCounter(count + 1, (err, count) => {
+      callback(err, count);
+    });
+  });
+
 };
 
 
