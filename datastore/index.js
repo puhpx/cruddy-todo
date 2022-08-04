@@ -46,15 +46,6 @@ exports.readOne = (id, callback) => {
   });
 };
 
-exports.readOne = (id, callback) => {
-  var text = items[id];
-  if (!text) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    callback(null, { id, text });
-  }
-};
-
 exports.update = (id, text, callback) => {
   var item = items[id];
   if (!item) {
