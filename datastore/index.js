@@ -18,10 +18,32 @@ exports.create = (text, callback) => {
 };
 
 exports.readAll = (callback) => {
-  var data = _.map(items, (text, id) => {
-    return { id, text };
+  var data = [];
+  fs.readdir(exports.dataDir, (err, files) => {
+    if (err) {
+      throw ('Failed to read all files');
+    } else {
+      files.forEach((file) => {
+        var id = file.slice(0, 5);
+        var todo = {id, text: id};
+        data.push(todo);
+        items[id] = true;
+      });
+    }
+    callback(null, data);
   });
-  callback(null, data);
+};
+
+exports.readOne = (id, callback) => {
+  var fileName = id + '.txt';
+  var filePath = exports.dataDir + '/' + fileName;
+  fs.readFile(filePath, (err, contents) => {
+    if (err) {
+      callback(new Error(`No item with id: ${id}`));
+    } else {
+      callback(null, { id, text: contents.toString() });
+    }
+  });
 };
 
 exports.readOne = (id, callback) => {
