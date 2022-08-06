@@ -6,13 +6,27 @@ var Promise = require('bluebird');
 var ps = Promise.promisifyAll(fs);
 
 var items = {};
+var getTimestamp = () => {
+  var timestamp = Math.floor(Date.now() / 1000);
+  var date = new Date(timestamp * 1000).toString().split(' ');
+  return `${date[1]} ${date[2]}, ${date[3]} ${date[4]}`;
+  // console.log(date);
+  // var YYYY = date.getFullYear();
+  // var MM = date.getMonth();
+  // var DD = date.getDate();
+  // var HH = date.getHours();
+  // var MM = date.getMinutes();
+  // var SS = date.getSeconds();
+  // return `${MM}/${DD}/${YYYY} ${HH}:${MM}:${SS}`;
+};
 
 // Public API - Fix these CRUD functions ///////////////////////////////////////
 
 exports.create = (text, callback) => {
+  var createTime = getTimestamp();
   counter.getNextUniqueId((err, id) => {
     fs.writeFile(path.join(exports.dataDir, id + '.txt'), text, (err) => {
-      callback(null, { id, text });
+      callback(null, { id, text, createTime });
     });
   });
 };
@@ -69,6 +83,7 @@ exports.readOne = (id, callback) => {
 
 exports.update = (id, text, callback) => {
   return new Promise((resolve, reject) => {
+
     var fileName = id + '.txt';
     var filePath = exports.dataDir + '/' + fileName;
     fs.readFile(filePath, (err, contents) => {
@@ -76,7 +91,7 @@ exports.update = (id, text, callback) => {
         reject(callback (new Error(`No item with id: ${id}`)));
       } else {
         resolve(fs.writeFile(filePath, text, () => {
-          callback(null, {id, text});
+          callback(null, {id, text });
         }));
       }
     });
