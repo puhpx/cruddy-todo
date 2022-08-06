@@ -10,8 +10,6 @@ var items = {};
 // Public API - Fix these CRUD functions ///////////////////////////////////////
 
 exports.create = (text, callback) => {
-
-  // var id = counter.getNextUniqueId();
   counter.getNextUniqueId((err, id) => {
     fs.writeFile(path.join(exports.dataDir, id + '.txt'), text, (err) => {
       callback(null, { id, text });
@@ -37,44 +35,78 @@ exports.readAll = (callback) => {
 };
 
 exports.readOne = (id, callback) => {
-  var fileName = id + '.txt';
-  var filePath = exports.dataDir + '/' + fileName;
-  fs.readFile(filePath, (err, contents) => {
-    if (err) {
-      callback(new Error(`No item with id: ${id}`));
-    } else {
-      callback(null, { id, text: contents.toString() });
-    }
+  return new Promise ((resolve, reject) => {
+    var fileName = id + '.txt';
+    var filePath = exports.dataDir + '/' + fileName;
+    fs.readFile(filePath, (err, contents) => {
+      if (err) {
+        reject(callback(new Error(`No item with id: ${id}`)));
+      } else {
+        resolve(callback(null, { id, text: contents.toString() }));
+      }
+    });
   });
 };
+
+//Non-Promise
+// exports.update = (id, text, callback) => {
+//   var fileName = id + '.txt';
+//   var filePath = exports.dataDir + '/' + fileName;
+//   fs.readFile(filePath, (err, contents) => {
+//     if (err) {
+//       callback (new Error(`No item with id: ${id}`));
+//     } else {
+//       fs.writeFile(filePath, text, (err) => {
+//         if (err) {
+//           throw ('error updating');
+//         } else {
+//           callback(null, {id, text});
+//         }
+//       });
+//     }
+//   });
+// };
 
 exports.update = (id, text, callback) => {
-  var fileName = id + '.txt';
-  var filePath = exports.dataDir + '/' + fileName;
-  fs.readFile(filePath, (err, contents) => {
-    if (err) {
-      callback (new Error(`No item with id: ${id}`));
-    } else {
-      fs.writeFile(filePath, text, (err) => {
-        if (err) {
-          throw ('error updating');
-        } else {
+  return new Promise((resolve, reject) => {
+    var fileName = id + '.txt';
+    var filePath = exports.dataDir + '/' + fileName;
+    fs.readFile(filePath, (err, contents) => {
+      if (err) {
+        reject(callback (new Error(`No item with id: ${id}`)));
+      } else {
+        resolve(fs.writeFile(filePath, text, () => {
           callback(null, {id, text});
-        }
-      });
-    }
+        }));
+      }
+    });
   });
 };
 
+// Non-Promise
+// exports.delete = (id, callback) => {
+//   var fileName = id + '.txt';
+//   var filePath = exports.dataDir + '/' + fileName;
+//   fs.unlink(filePath, (err) => {
+//     if (err) {
+//       callback(new Error(`No item with id: ${id}`));
+//     } else {
+//       callback();
+//     }
+//   });
+// };
+
 exports.delete = (id, callback) => {
-  var fileName = id + '.txt';
-  var filePath = exports.dataDir + '/' + fileName;
-  fs.unlink(filePath, (err) => {
-    if (err) {
-      callback(new Error(`No item with id: ${id}`));
-    } else {
-      callback();
-    }
+  return new Promise ((resolve, reject) => {
+    var fileName = id + '.txt';
+    var filePath = exports.dataDir + '/' + fileName;
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        reject(callback(new Error(`No item with id: ${id}`)));
+      } else {
+        resolve(callback());
+      }
+    });
   });
 };
 

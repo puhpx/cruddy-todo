@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const sprintf = require('sprintf-js').sprintf;
+var Promise = require('bluebird');
 
 var counter;
 
@@ -15,24 +16,51 @@ const zeroPaddedNumber = (num) => {
   return sprintf('%05d', num);
 };
 
+// Non-Promise
+// const readCounter = (callback) => {
+//   fs.readFile(exports.counterFile, (err, fileData) => {
+//     if (err) {
+//       callback(null, 0);
+//     } else {
+//       callback(null, Number(fileData));
+//     }
+//   });
+// };
+
 const readCounter = (callback) => {
-  fs.readFile(exports.counterFile, (err, fileData) => {
-    if (err) {
-      callback(null, 0);
-    } else {
-      callback(null, Number(fileData));
-    }
+  return new Promise((resolve, reject) => {
+    fs.readFile(exports.counterFile, (err, fileData) => {
+      if (fileData) {
+        resolve(callback(null, Number(fileData)));
+      } else {
+        reject(callback(null, 0));
+      }
+    });
   });
 };
 
+// Non-Promise
+// const writeCounter = (count, callback) => {
+//   var counterString = zeroPaddedNumber(count);
+//   fs.writeFile(exports.counterFile, counterString, (err) => {
+//     if (err) {
+//       throw ('error writing counter');
+//     } else {
+//       callback(null, counterString);
+//     }
+//   });
+// };
+
 const writeCounter = (count, callback) => {
-  var counterString = zeroPaddedNumber(count);
-  fs.writeFile(exports.counterFile, counterString, (err) => {
-    if (err) {
-      throw ('error writing counter');
-    } else {
-      callback(null, counterString);
-    }
+  return new Promise ((resolve, reject) => {
+    var counterString = zeroPaddedNumber(count);
+    fs.writeFile(exports.counterFile, counterString, (err) => {
+      if (err) {
+        reject('error writing counter');
+      } else {
+        resolve(callback(null, counterString));
+      }
+    });
   });
 };
 
@@ -40,13 +68,27 @@ const writeCounter = (count, callback) => {
 
 // Public API - Fix this function //////////////////////////////////////////////
 
+// Non-Promise
+// exports.getNextUniqueId = (callback) => {
+//   readCounter((err, count) => {
+//     writeCounter(count + 1, (err, count) => {
+//       callback(err, count);
+//     });
+//   });
+// };
+
 exports.getNextUniqueId = (callback) => {
-  readCounter((err, count) => {
-    writeCounter(count + 1, (err, count) => {
-      callback(err, count);
+  return new Promise((resolve, reject) => {
+    readCounter((err, count) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(writeCounter(count + 1, (err, count) => {
+          callback(err, count);
+        }));
+      }
     });
   });
-
 };
 
 
